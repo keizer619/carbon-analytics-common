@@ -31,6 +31,10 @@ public class UIEventAdapterConstants {
     public static final String ADAPTER_USAGE_TIPS_PREFIX = "ui.usage.tips_prefix";
     public static final String ADAPTER_USAGE_TIPS_POSTFIX = "ui.usage.tips_postfix";
     public static final String ADAPTER_UI_DEFAULT_OUTPUT_STREAM_VERSION = "1.0.0";
+
+    public static final String APAPTER_MESSAGE_UI_KEY = "ui.key";
+    public static final String APAPTER_MESSAGE_UI_KEY_HINT = "uiKey.hint";
+
     public static final String ADAPTER_UI_COLON = ":";
     public static final int INDEX_ZERO = 0;
     public static final int INDEX_ONE = 1;

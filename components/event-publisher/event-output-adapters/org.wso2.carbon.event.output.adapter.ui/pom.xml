@@ -37,6 +37,10 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
         </dependency>
         <dependency>
@@ -97,6 +101,7 @@
                             org.wso2.carbon.event.output.adapter.ui.*
                         </Export-Package>
                         <Import-Package>
+                            org.wso2.carbon.event.publisher.core.*,
                             org.wso2.carbon.event.output.adapter.core.*,
                             javax.xml.namespace; version=0.0.0,
                             *;resolution:=optional,

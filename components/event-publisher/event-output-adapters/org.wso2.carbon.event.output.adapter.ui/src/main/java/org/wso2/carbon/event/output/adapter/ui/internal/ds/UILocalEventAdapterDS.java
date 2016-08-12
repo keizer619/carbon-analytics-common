@@ -28,9 +28,13 @@ import org.wso2.carbon.event.output.adapter.ui.internal.UIOutputCallbackControll
 import org.wso2.carbon.event.output.adapter.ui.UIEventAdapterFactory;
 import org.wso2.carbon.event.output.adapter.ui.UIOutputCallbackControllerService;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
 
 /**
  * @scr.component component.name="output.Ui.AdapterService.component" immediate="true"
+ * @scr.reference name="eventPublisherService.service"
+ * interface="org.wso2.carbon.event.publisher.core.EventPublisherService" cardinality="1..1"
+ * policy="dynamic" bind="setEventPublisherService" unbind="unSetEventPublisherService"
  */
 public class UILocalEventAdapterDS {
 
@@ -38,7 +42,6 @@ public class UILocalEventAdapterDS {
 
     /**
      * initialize the ui adapter service here service here.
-     *
      * @param context
      */
     protected void activate(ComponentContext context) {
@@ -60,5 +63,13 @@ public class UILocalEventAdapterDS {
         } catch (RuntimeException e) {
             log.error("Can not create the output ui adapter service ", e);
         }
+    }
+
+    protected void setEventPublisherService(EventPublisherService eventPublisherService) {
+        UIEventAdaptorServiceInternalValueHolder.registerEventPublisherService(eventPublisherService);
+    }
+
+    protected void unSetEventPublisherService(EventPublisherService eventPublisherService) {
+        UIEventAdaptorServiceInternalValueHolder.registerEventPublisherService(null);
     }
 }

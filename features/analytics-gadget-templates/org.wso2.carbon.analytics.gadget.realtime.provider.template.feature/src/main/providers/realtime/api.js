@@ -19,6 +19,8 @@ var getConfig, validate, getMode, getSchema, getData, registerCallBackforPush;
 
     var PROVIDERS_LOCATION = '/extensions/providers/';
     var PROVIDER_NAME = 'realtime';
+    var USER_TOKEN = "user";
+    var HTTP_USER_NOT_AUTHENTICATED = 403;
 
     var log = new Log();
     var utils = require('/modules/utils.js');
@@ -26,6 +28,7 @@ var getConfig, validate, getMode, getSchema, getData, registerCallBackforPush;
     var EventPublisherConstants = Packages.org.wso2.carbon.event.publisher.core.config.EventPublisherConstants;
     var eventPublisherService = carbon.server.osgiService('org.wso2.carbon.event.publisher.core.EventPublisherService');
     var eventStreamService = carbon.server.osgiService('org.wso2.carbon.event.stream.core.EventStreamService');
+    var key;
 
     var typeMap = {
         "bool": "string",
@@ -51,6 +54,8 @@ var getConfig, validate, getMode, getSchema, getData, registerCallBackforPush;
                 var mappingTypeIsWso2 = eventPublisherConfiguration.getOutputMapping()
                     .getMappingType().equals(EventPublisherConstants.EF_WSO2EVENT_MAPPING_TYPE);
 
+                key = eventPublisherConfiguration.getToAdapterConfiguration().getStaticProperties().get("ui.key");
+
                 var adapterType = null;
                 if (eventPublisherConfiguration.getToAdapterConfiguration() != null) {
                     adapterType = eventPublisherConfiguration.getToAdapterConfiguration().getType();
@@ -68,6 +73,7 @@ var getConfig, validate, getMode, getSchema, getData, registerCallBackforPush;
                 "fieldType": "dropDown"
             };
             datasourceCfg['valueSet'] = datasources;
+            datasourceCfg['key'] = key;
         } catch (e) {
             log.error(e);
         }
@@ -92,6 +98,25 @@ var getConfig, validate, getMode, getSchema, getData, registerCallBackforPush;
      */
     getMode = function() {
         return 'push';
+    };
+
+    getKey = function() {
+        var token = session.get(USER_TOKEN);
+        if (token != null) {
+            var eventPublisherConfigurationList = eventPublisherService.getAllActiveEventPublisherConfigurations();
+            for (var i = 0; i < eventPublisherConfigurationList.size(); i++) {
+                var eventPublisherConfiguration = eventPublisherService.getActiveEventPublisherConfiguration(
+                    eventPublisherConfigurationList.get(i).getEventPublisherName());;
+
+                key = eventPublisherConfiguration.getToAdapterConfiguration().getStaticProperties().get("ui.key");
+            }
+            return {key:key};
+        } else {
+            log.error("user is not authenticated!");
+            response.status = HTTP_USER_NOT_AUTHENTICATED;
+            print('{ "status": "Failed", "message": "User is not authenticated." }');
+            return;
+        }
     };
 
     /**
@@ -142,12 +167,13 @@ var getConfig, validate, getMode, getSchema, getData, registerCallBackforPush;
                 }
             }
         }
+
         return output;
     };
 
     getData = function(providerConfig,limit) {
-      var data = [];
-      return data;
+        var data = [];
+        return data;
     };
 
 

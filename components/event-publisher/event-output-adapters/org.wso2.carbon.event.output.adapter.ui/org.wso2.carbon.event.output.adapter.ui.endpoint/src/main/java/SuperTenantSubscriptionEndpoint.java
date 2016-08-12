@@ -22,12 +22,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.servlet.ServiceHolder;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.websocket.CloseReason;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.servlet.http.HttpSession;
+
+import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
@@ -35,10 +32,15 @@ import javax.websocket.server.ServerEndpoint;
  * Connect to web socket with Super tenant
  */
 
-@ServerEndpoint(value = "/{streamname}/{version}")
+@ServerEndpoint(value = "/{streamname}/{version}", configurator = GetHttpSessionConfigurator.class)
 public class SuperTenantSubscriptionEndpoint extends SubscriptionEndpoint {
 
     private static final Log log = LogFactory.getLog(SuperTenantSubscriptionEndpoint.class);
+
+    private EndpointConfig config;
+
+
+
 
     /**
      * Web socket onOpen - When client sends a message
@@ -48,8 +50,13 @@ public class SuperTenantSubscriptionEndpoint extends SubscriptionEndpoint {
      * @param version -  Version extracted from the ws url.
      */
     @OnOpen
-    public void onOpen (Session session, @PathParam("streamname") String streamName ,
+    public void onOpen (Session session, EndpointConfig config, @PathParam("streamname") String streamName ,
             @PathParam("version") String version) {
+
+        HttpSession httpSession = (HttpSession) config.getUserProperties()
+                .get(HttpSession.class.getName());
+
+
         if (log.isDebugEnabled()) {
             log.debug("WebSocket opened, for Session id: "+session.getId()+", for the Stream:"+streamName);
         }

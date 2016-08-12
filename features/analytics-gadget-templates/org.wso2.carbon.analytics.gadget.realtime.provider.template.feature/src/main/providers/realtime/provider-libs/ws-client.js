@@ -127,7 +127,30 @@ function subscribe(streamName,version,intervalTime,domain,
         pollingContinue = true;
         startPoll();
     } else{
-        initializeWebSocket(webSocketUrl);
+
+
+
+        getGadgetLocation(function (gadget_Location) {
+            $.ajax({
+                url: gadget_Location + '/conf.json',
+                method: "GET",
+                contentType: "application/json",
+                async: false,
+                success: function (data) {
+                    var conf = JSON.parse(data);
+                    $.ajax({
+                        url: gadget_Location + '/gadget-controller.jag?action=getKey',
+                        method: "POST",
+                        data: JSON.stringify(conf),
+                        contentType: "application/json",
+                        async: false,
+                        success: function (data) {
+                            initializeWebSocket(webSocketUrl+"?key="+data.key);
+                        }
+                    });
+                }
+            });
+        });
     }
 }
 
@@ -273,3 +296,4 @@ function constructPayload(eventsArray){
     onSuccessFunction(streamId,twoDimentionalArray);
 
 }
+

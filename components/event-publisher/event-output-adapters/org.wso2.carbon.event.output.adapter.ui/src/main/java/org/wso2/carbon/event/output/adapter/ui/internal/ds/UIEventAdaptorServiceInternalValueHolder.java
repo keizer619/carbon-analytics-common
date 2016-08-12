@@ -20,8 +20,8 @@
 package org.wso2.carbon.event.output.adapter.ui.internal.ds;
 
 import org.wso2.carbon.event.output.adapter.ui.internal.UIOutputCallbackControllerServiceImpl;
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
 
-import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -53,5 +53,19 @@ public final class UIEventAdaptorServiceInternalValueHolder {
     public static ConcurrentHashMap<Integer, ConcurrentHashMap<String, LinkedBlockingDeque<Object>>>
     getTenantSpecificStreamEventMap() {
         return tenantSpecificStreamEventMap;
+    }
+
+
+
+    private static EventPublisherService eventPublisherService;
+
+
+    public static void registerEventPublisherService(
+            EventPublisherService eventPublisherService) {
+        UIEventAdaptorServiceInternalValueHolder.eventPublisherService = eventPublisherService;
+    }
+
+    public static EventPublisherService getEventPublisherService() {
+        return UIEventAdaptorServiceInternalValueHolder.eventPublisherService;
     }
 }

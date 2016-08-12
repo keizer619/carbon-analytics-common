@@ -20,7 +20,6 @@
 package org.wso2.carbon.event.output.adapter.ui.internal;
 
 import com.google.gson.JsonObject;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.ui.UIOutputCallbackControllerService;
 import org.wso2.carbon.event.output.adapter.ui.internal.ds.UIEventAdaptorServiceInternalValueHolder;
@@ -55,29 +54,54 @@ public class UIOutputCallbackControllerServiceImpl implements UIOutputCallbackCo
      * @return
      */
     public void subscribeWebsocket(String streamName, String version, Session session) {
-
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        String clientKey = "";
+        String publisherKey = "";
 
         if (version == null || " ".equals(version)) {
             version = UIEventAdapterConstants.ADAPTER_UI_DEFAULT_OUTPUT_STREAM_VERSION;
         }
         String streamId = streamName + UIEventAdapterConstants.ADAPTER_UI_COLON + version;
-        ConcurrentHashMap<String, CopyOnWriteArrayList<Session>> tenantSpecificAdaptorMap =
-                outputEventAdaptorSessionMap.get(tenantId);
-        if (tenantSpecificAdaptorMap == null) {
-            tenantSpecificAdaptorMap = new ConcurrentHashMap<String, CopyOnWriteArrayList<Session>>();
-            if (null != outputEventAdaptorSessionMap.putIfAbsent(tenantId, tenantSpecificAdaptorMap)) {
-                tenantSpecificAdaptorMap = outputEventAdaptorSessionMap.get(tenantId);
+
+        if(session.getQueryString() != null) {
+            try {
+
+                publisherKey =  UIEventAdaptorServiceInternalValueHolder.getEventPublisherService()
+                        .getActiveEventPublisherConfiguration(UIEventAdaptorServiceInternalValueHolder
+                                .getTenantSpecificOutputEventStreamAdapterMap().get(tenantId).get(streamId))
+                        .getToAdapterConfiguration().getStaticProperties().get("ui.key");
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+            for(String param : session.getQueryString().split("&")) {
+                if (param.split("=")[0].equals("key")) {
+                    clientKey = param.split("=")[1];
+                break;
+                }
             }
         }
-        CopyOnWriteArrayList<Session> adapterSpecificSessions = tenantSpecificAdaptorMap.get(streamId);
-        if (adapterSpecificSessions == null) {
-            adapterSpecificSessions = new CopyOnWriteArrayList<Session>();
-            if (null != tenantSpecificAdaptorMap.putIfAbsent(streamId, adapterSpecificSessions)) {
-                adapterSpecificSessions = tenantSpecificAdaptorMap.get(streamId);
+
+        if ((!clientKey.equals("") && clientKey.equals(publisherKey) ) || publisherKey.equals("")) {
+            ConcurrentHashMap<String, CopyOnWriteArrayList<Session>> tenantSpecificAdaptorMap =
+                    outputEventAdaptorSessionMap.get(tenantId);
+            if (tenantSpecificAdaptorMap == null) {
+                tenantSpecificAdaptorMap = new ConcurrentHashMap<String, CopyOnWriteArrayList<Session>>();
+                if (null != outputEventAdaptorSessionMap.putIfAbsent(tenantId, tenantSpecificAdaptorMap)) {
+                    tenantSpecificAdaptorMap = outputEventAdaptorSessionMap.get(tenantId);
+                }
             }
+            CopyOnWriteArrayList<Session> adapterSpecificSessions = tenantSpecificAdaptorMap.get(streamId);
+            if (adapterSpecificSessions == null) {
+                adapterSpecificSessions = new CopyOnWriteArrayList<Session>();
+                if (null != tenantSpecificAdaptorMap.putIfAbsent(streamId, adapterSpecificSessions)) {
+                    adapterSpecificSessions = tenantSpecificAdaptorMap.get(streamId);
+                }
+            }
+            adapterSpecificSessions.add(session);
         }
-        adapterSpecificSessions.add(session);
     }
 
     /**

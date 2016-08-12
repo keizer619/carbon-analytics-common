@@ -64,7 +64,18 @@ public class UIEventAdapterFactory extends OutputEventAdapterFactory {
 
     @Override
     public List<Property> getStaticPropertyList() {
-        return null;
+
+        List<Property> staticPropertyList = new ArrayList<Property>();
+
+        Property key = new Property(UIEventAdapterConstants.APAPTER_MESSAGE_UI_KEY);
+        key.setDisplayName(resourceBundle.getString(UIEventAdapterConstants.APAPTER_MESSAGE_UI_KEY));
+        key.setRequired(false);
+        key.setSecured(true);
+        key.setHint(resourceBundle.getString(UIEventAdapterConstants.APAPTER_MESSAGE_UI_KEY_HINT));
+
+        staticPropertyList.add(key);
+
+        return staticPropertyList;
     }
 
     @Override
